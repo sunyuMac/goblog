@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 	"unicode/utf8"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type ArticlesFormData struct {
