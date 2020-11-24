@@ -12,6 +12,7 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 	} else if r.URL.Path == "/sun" {
 		fmt.Fprint(w, "又来了老弟")
 	} else {
+		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(w, "404 not found")
 	}
 }
