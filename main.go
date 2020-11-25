@@ -49,13 +49,48 @@ func initDB() {
 	// 设置最大连接数
 	db.SetMaxOpenConns(25)
 	// 设置最大空闲连接数
-	db.SetMaxIdleConns(25)
+	db.SetMaxIdleConns(5)
 	// 设置每个链接的过期时间
 	db.SetConnMaxLifetime(5 * time.Minute)
 
 	// 尝试连接，失败会报错
 	//err = db.Ping()
 	//checkError(err)
+}
+
+// Link 方法用来生成文章链接
+func (a Article) Link() string {
+	showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
+	if err != nil {
+		checkError(err)
+		return ""
+	}
+	return showURL.String()
+}
+
+func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT * FROM articles")
+	checkError(err)
+	defer rows.Close()
+
+	articles := []Article{}
+	for rows.Next() {
+		article := Article{}
+		err := rows.Scan(&article.ID, &article.Title, &article.Body)
+		checkError(err)
+
+		articles = append(articles, article)
+	}
+	// 2.3 检测遍历时是否发生错误
+	err = rows.Err()
+	checkError(err)
+
+	// 3. 加载模板
+	tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+	checkError(err)
+
+	// 4. 渲染模板，将所有文章的数据传输进去
+	tmpl.Execute(w, articles)
 }
 
 func createTables() {
@@ -106,10 +141,6 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 		checkError(err)
 		tmpl.Execute(w, article)
 	}
-}
-
-func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "文章列表")
 }
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
@@ -211,9 +242,8 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func getRouteVariable(parameterName string, r *http.Request) (parameterValue string) {
-	parameterValue = mux.Vars(r)[parameterName]
-	return
+func getRouteVariable(parameterName string, r *http.Request) string {
+	return mux.Vars(r)[parameterName]
 }
 
 func getArticleByID(id string) (article Article, err error) {
