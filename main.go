@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
-	"goblog/pkg/types"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -66,31 +67,6 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-
-func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
-	// 读取url中的参数
-	// 2. 读取对应的文章数据
-	article, err := getArticleByID(route.GetRouteVariable("id", r))
-	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章未找到")
-		} else {
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		tmpl, err := template.New("show.gohtml").
-			Funcs(template.FuncMap{
-				"RouteName2URL": route.Name2URL,
-				"Int64ToString": types.Int64ToString,
-			}).
-			ParseFiles("resources/views/articles/show.gohtml")
-		logger.LogError(err)
-		tmpl.Execute(w, article)
-	}
-}
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.PostFormValue("title")
@@ -217,7 +193,7 @@ func validateArticleFormData(title, body string) map[string]string {
 
 func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取url中的id
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 	// 2. 读取对应的文章数据
 	article, err := getArticleByID(id)
 
@@ -251,7 +227,7 @@ func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取url中的id
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 
 	_, err := getArticleByID(id)
 	if err != nil {
@@ -316,7 +292,7 @@ func (a Article) Delete() (int64, error) {
 }
 
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 
 	article, err := getArticleByID(id)
 	if err != nil {
@@ -352,6 +328,10 @@ func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getRouteVariable(parameterName string, r *http.Request) string {
+	return mux.Vars(r)[parameterName]
+}
+
 func articlesUpdateToDb(id, title, body string) (rs sql.Result, err error) {
 	query := "UPDATE articles SET title = ?, body = ? WHERE id = ?"
 	rs, err = db.Exec(query, title, body, id)
@@ -360,9 +340,9 @@ func articlesUpdateToDb(id, title, body string) (rs sql.Result, err error) {
 
 func main() {
 	database.Initialize()
-	route.Initialize()
 
-	router.HandleFunc("/articles/{id:[0-9]+}", articlesShowHandler).Methods("GET").Name("articles.show")
+	bootstrap.SetupRoute()
+
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
