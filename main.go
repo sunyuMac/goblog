@@ -3,8 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
+	"goblog/pkg/database"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/types"
@@ -13,7 +13,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 )
 
@@ -29,35 +28,7 @@ type Article struct {
 }
 
 var router = route.Router
-var db *sql.DB
-
-func initDB() {
-
-	var err error
-	config := mysql.Config{
-		User:                 "homestead",
-		Passwd:               "secret",
-		Addr:                 "192.168.10.10:3306",
-		Net:                  "tcp",
-		DBName:               "goblog",
-		AllowNativePasswords: true,
-	}
-
-	// 准备数据库连接池
-	db, err = sql.Open("mysql", config.FormatDSN())
-	logger.LogError(err)
-
-	// 设置最大连接数
-	db.SetMaxOpenConns(25)
-	// 设置最大空闲连接数
-	db.SetMaxIdleConns(5)
-	// 设置每个链接的过期时间
-	db.SetConnMaxLifetime(5 * time.Minute)
-
-	// 尝试连接，失败会报错
-	//err = db.Ping()
-	//logger.LogError(err)
-}
+var db = database.DB
 
 // Link 方法用来生成文章链接
 func (a Article) Link() string {
@@ -92,17 +63,6 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 4. 渲染模板，将所有文章的数据传输进去
 	tmpl.Execute(w, articles)
-}
-
-func createTables() {
-	createArticlesSQL := `CREATE TABLE IF NOT EXISTS articles(
-    id bigint(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    title varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-    body longtext COLLATE utf8mb4_unicode_ci
-); `
-
-	_, err := db.Exec(createArticlesSQL)
-	logger.LogError(err)
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -410,8 +370,8 @@ func articlesUpdateToDb(id, title, body string) (rs sql.Result, err error) {
 }
 
 func main() {
-	initDB()
-	createTables()
+
+	database.Initialize()
 
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
