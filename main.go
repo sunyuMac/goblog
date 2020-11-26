@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 	"goblog/route"
 	"html/template"
 	"log"
@@ -127,7 +126,7 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 	// 读取url中的参数
 	// 2. 读取对应的文章数据
-	article, err := getArticleByID(getRouteVariable("id", r))
+	article, err := getArticleByID(route.GetRouteVariable("id", r))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -248,10 +247,6 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func getRouteVariable(parameterName string, r *http.Request) string {
-	return mux.Vars(r)[parameterName]
-}
-
 func getArticleByID(id string) (article Article, err error) {
 	article = Article{}
 	query := "SELECT * FROM articles WHERE id = ?"
@@ -278,7 +273,7 @@ func validateArticleFormData(title, body string) map[string]string {
 
 func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取url中的id
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 	// 2. 读取对应的文章数据
 	article, err := getArticleByID(id)
 
@@ -312,7 +307,7 @@ func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取url中的id
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 
 	_, err := getArticleByID(id)
 	if err != nil {
@@ -382,7 +377,7 @@ func (a Article) Delete() (int64, error) {
 }
 
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 
 	article, err := getArticleByID(id)
 	if err != nil {

@@ -1,6 +1,9 @@
 package route
 
-import "github.com/gorilla/mux"
+import (
+	"github.com/gorilla/mux"
+	"net/http"
+)
 
 var Router = mux.NewRouter()
 
@@ -13,4 +16,8 @@ func Name2URL(routeName string, pairs ...string) string {
 	}
 
 	return url.String()
+}
+
+func GetRouteVariable(parameterName string, r *http.Request) string {
+	return mux.Vars(r)[parameterName]
 }
