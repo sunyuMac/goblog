@@ -8,7 +8,6 @@ import (
 	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
-	"goblog/pkg/route"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -28,7 +27,7 @@ type Article struct {
 	ID          int64
 }
 
-var router = route.Router
+var router *mux.Router
 var db = database.DB
 
 // Link 方法用来生成文章链接
@@ -341,7 +340,8 @@ func articlesUpdateToDb(id, title, body string) (rs sql.Result, err error) {
 func main() {
 	database.Initialize()
 
-	bootstrap.SetupRoute()
+	bootstrap.SetupDB()
+	router = bootstrap.SetupRoute()
 
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")

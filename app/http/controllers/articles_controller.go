@@ -43,4 +43,4 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, article)
 	}
 }
-}
+
