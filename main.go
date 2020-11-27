@@ -11,8 +11,10 @@ import (
 	"goblog/pkg/route"
 	"html/template"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type Article struct {
@@ -83,7 +85,27 @@ func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, data)
 	}
 }
+type ArticlesFormData struct {
+	Title, Body string
+	URL         *url.URL
+	Errors      map[string]string
+}
+func validateArticleFormData(title, body string) map[string]string {
+	errors := make(map[string]string)
 
+	if title == "" {
+		errors["title"] = "标题不能为空"
+	} else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
+		errors["title"] = "标题长度需介于3~40"
+	}
+
+	if body == "" {
+		errors["body"] = "内容不能为空"
+	} else if utf8.RuneCountInString(body) < 10 {
+		errors["body"] = "内容长度需要大于10个字符"
+	}
+	return errors
+}
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取url中的id
 	id := getRouteVariable("id", r)
