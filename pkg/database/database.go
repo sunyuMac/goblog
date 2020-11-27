@@ -16,7 +16,6 @@ func Initialize() {
 }
 
 func initDB() {
-
 	var err error
 	config := mysql.Config{
 		User:                 "homestead",

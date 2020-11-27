@@ -28,7 +28,7 @@ type Article struct {
 }
 
 var router *mux.Router
-var db = database.DB
+var db *sql.DB
 
 // Link 方法用来生成文章链接
 func (a Article) Link() string {
@@ -64,8 +64,6 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	// 4. 渲染模板，将所有文章的数据传输进去
 	tmpl.Execute(w, articles)
 }
-
-
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.PostFormValue("title")
@@ -339,6 +337,7 @@ func articlesUpdateToDb(id, title, body string) (rs sql.Result, err error) {
 
 func main() {
 	database.Initialize()
+	db = database.DB
 
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
