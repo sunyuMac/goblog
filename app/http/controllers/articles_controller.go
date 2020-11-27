@@ -17,10 +17,8 @@ type ArticlesController struct {
 func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	// 1. 获取 URL 参数
 	id := route.GetRouteVariable("id", r)
-
 	// 2. 读取对应的文章数据
 	article, err := article.Get(id)
-
 	// 3. 如果出现错误
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -46,3 +44,18 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
+	articles, err := article.GetAll()
+	if err != nil {
+		logger.LogError(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "500 服务器内部错误")
+	}else {
+		// 3. 加载模板
+		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		logger.LogError(err)
+
+		// 4. 渲染模板，将所有文章的数据传输进去
+		tmpl.Execute(w, articles)
+	}
+}
