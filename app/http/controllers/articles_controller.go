@@ -222,6 +222,36 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Delete 删除文章
+func (a *ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
+	id := route.GetRouteVariable("id", r)
+	_article, err := article.Get(id)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// 3.1 数据未找到
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "404 文章未找到")
+		} else {
+			// 3.2 数据库错误
+			logger.LogError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "500 服务器内部错误")
+		}
+	} else {
+		_, err := _article.Delete()
+		if err != nil {
+			// 数据库错误
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "500 服务器内部错误")
+			return
+		}
+
+		inxdexURL := route.Name2URL("articles.index")
+		http.Redirect(w, r, inxdexURL, http.StatusFound)
+	}
+}
+
+// validateArticleFormData 验证文章表单信息
 func validateArticleFormData(title, body string) map[string]string {
 	errors := make(map[string]string)
 
