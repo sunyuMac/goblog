@@ -24,6 +24,7 @@ func Name2URL(routeName string, pairs ...string) string {
 	return url.String()
 }
 
+// GetRouteVariable 获取路由中的参数
 func GetRouteVariable(parameterName string, r *http.Request) string {
 	return mux.Vars(r)[parameterName]
 }
