@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 )
@@ -52,6 +53,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Index 文章列表页
 func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 	articles, err := article.GetAll()
 	if err != nil {
@@ -59,12 +61,19 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
+		viewDir := "resources/views"
+
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
+		logger.LogError(err)
+
+		newFiles := append(files, viewDir+"/articles/index.gohtml")
+
 		// 3. 加载模板
-		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		tmpl, err := template.ParseFiles(newFiles...)
 		logger.LogError(err)
 
 		// 4. 渲染模板，将所有文章的数据传输进去
-		tmpl.Execute(w, articles)
+		tmpl.ExecuteTemplate(w, "app", articles)
 	}
 }
 
