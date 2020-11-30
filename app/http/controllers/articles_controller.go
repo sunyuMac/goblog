@@ -23,6 +23,7 @@ type ArticlesFormData struct {
 	Errors      map[string]string
 }
 
+// Show 文章详情页面
 func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	// 1. 获取 URL 参数
 	id := route.GetRouteVariable("id", r)
@@ -41,15 +42,19 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
 	} else {
+		viewDir := "resources/views"
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
+		logger.LogError(err)
+		files = append(files, viewDir+"/articles/show.gohtml")
 		// 4. 读取成功，显示文章
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
 				"RouteName2URL": route.Name2URL,
 				"Int64ToString": types.Int64ToString,
 			}).
-			ParseFiles("resources/views/articles/show.gohtml")
+			ParseFiles(files...)
 		logger.LogError(err)
-		tmpl.Execute(w, _article)
+		tmpl.ExecuteTemplate(w, "app", _article)
 	}
 }
 
@@ -62,16 +67,12 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
 		viewDir := "resources/views"
-
 		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
 		logger.LogError(err)
-
-		newFiles := append(files, viewDir+"/articles/index.gohtml")
-
+		files = append(files, viewDir+"/articles/index.gohtml")
 		// 3. 加载模板
-		tmpl, err := template.ParseFiles(newFiles...)
+		tmpl, err := template.ParseFiles(files...)
 		logger.LogError(err)
-
 		// 4. 渲染模板，将所有文章的数据传输进去
 		tmpl.ExecuteTemplate(w, "app", articles)
 	}
