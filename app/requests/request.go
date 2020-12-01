@@ -3,10 +3,10 @@ package requests
 import (
 	"errors"
 	"fmt"
-"goblog/pkg/model"
-"strings"
+	"goblog/pkg/model"
+	"strings"
 
-"github.com/thedevsaddam/govalidator"
+	"github.com/thedevsaddam/govalidator"
 )
 
 // 此方法会在初始化时执行
