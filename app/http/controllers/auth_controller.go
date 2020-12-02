@@ -53,11 +53,9 @@ func (*AuthController) Login(w http.ResponseWriter, r *http.Request) {
 
 // DoLogin
 func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request) {
-
 	// 1. 初始化表单数据
 	email := r.PostFormValue("email")
 	password := r.PostFormValue("password")
-
 	// 2. 尝试登录
 	if err := auth.Attempt(email, password); err == nil {
 		// 登录成功
@@ -70,4 +68,10 @@ func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request) {
 			"Password": password,
 		}, "auth.login")
 	}
+}
+
+// Logout 退出登录
+func (*AuthController) Logout(w http.ResponseWriter, r *http.Request) {
+	auth.Logout()
+	http.Redirect(w, r, "/", http.StatusFound)
 }
