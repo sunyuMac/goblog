@@ -3,7 +3,9 @@ package controllers
 import (
 	"fmt"
 	"goblog/app/models/article"
+	"goblog/app/policies"
 	"goblog/app/requests"
+	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/view"
@@ -98,10 +100,17 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
 	} else {
+		// 检查权限
+		if !policies.CanModifyArticle(_article) {
+			flash.Warning("未授权操作！")
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 		view.Render(w, view.D{
 			"Article": _article,
 			"Errors":  view.D{},
 		}, "articles.edit", "articles._form_field")
+
 	}
 }
 
@@ -126,6 +135,12 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// 4. 未出现错误
+		// 检查权限
+		if !policies.CanModifyArticle(_article) {
+			flash.Warning("未授权操作！")
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 
 		_article.Title = r.PostFormValue("title")
 		_article.Body = r.PostFormValue("body")
@@ -176,6 +191,13 @@ func (a *ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
 	} else {
+		// 检查权限
+		if !policies.CanModifyArticle(_article) {
+			flash.Warning("未授权操作！")
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		// 删除文章
 		_, err := _article.Delete()
 		if err != nil {
 			// 数据库错误
@@ -183,7 +205,7 @@ func (a *ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 			return
 		}
-
+		// 重定向到列表页
 		inxdexURL := route.Name2URL("articles.index")
 		http.Redirect(w, r, inxdexURL, http.StatusFound)
 	}

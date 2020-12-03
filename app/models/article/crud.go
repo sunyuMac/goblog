@@ -15,8 +15,7 @@ func Get(idstr string) (Article, error) {
 	return article, nil
 }
 
-func GetAll() ([]Article, error) {
-	var articles []Article
+func GetAll() (articles []Article, err error) {
 	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
 		return articles, err
 	}
@@ -48,4 +47,10 @@ func (article *Article) Delete() (rowsAffected int64, err error) {
 	}
 
 	return result.RowsAffected, nil
+}
+
+func GetByUserId(userId string) (articles []Article, err error) {
+	err = model.DB.Preload("User").Where("user_id = ?", userId).Find(&articles).Error
+
+	return
 }

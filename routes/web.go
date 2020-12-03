@@ -34,6 +34,10 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/dologin", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.dologin")
 	r.HandleFunc("/auth/logout", middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
 
+	// 用户认证
+	uc := new(controllers.UserController)
+	r.HandleFunc("/users/{id:[0-9]+}", uc.Show).Methods("GET").Name("users.show")
+
 	// 中间件：强制header内容类型为 HTML
 	//r.Use(middlewares.ForceHTML)
 	r.Use(middlewares.StartSession)
