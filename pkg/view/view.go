@@ -2,6 +2,7 @@ package view
 
 import (
 	"goblog/pkg/auth"
+	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"html/template"
@@ -25,8 +26,10 @@ func RenderSimple(w io.Writer, data D, tplFiles ...string) {
 
 // RenderTemplate 渲染视图
 func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
-	// 判断是否登录
+	// 通用模板数据
 	data["isLogined"] = auth.Check()
+	data["loginUser"] = auth.User
+	data["flash"] = flash.All()
 	// 合并所有模板文件
 	allFiles := getTempleFiles(tplFiles...)
 	// 解析所有模板文件
