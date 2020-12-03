@@ -17,6 +17,11 @@ type User struct {
 }
 
 // ComparePassword 对比密码是否匹配
-func (u User) ComparePassword(_password string) bool  {
+func (u User) ComparePassword(_password string) bool {
 	return password.CheckHash(_password, u.Password)
+}
+
+// Link 生成用户连接
+func (u User) Link() string {
+	return ""
 }
