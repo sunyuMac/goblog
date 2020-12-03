@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/gorilla/mux"
 	"goblog/app/http/controllers"
-	"goblog/app/middlewares"
+	"goblog/app/http/middlewares"
 	"net/http"
 )
 
