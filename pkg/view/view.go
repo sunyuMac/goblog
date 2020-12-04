@@ -46,6 +46,7 @@ func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 	tmpl.ExecuteTemplate(w, name, data)
 }
 
+// getTempleFiles 整合公共模板文件
 func getTempleFiles(tplFiles ...string) []string {
 	// 1 设置模板相对路径
 	viewDir := "resources/views/"

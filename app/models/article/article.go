@@ -9,10 +9,11 @@ import (
 type Article struct {
 	models.BaseModel
 
-	Title  string `gorm:"column:title;type:varchar(255);not null" valid:"title"`
-	Body   string `gorm:"column:body;type:text;not null" valid:"body"`
-	UserID uint64 `gorm:"not null;index"`
-	User   user.User
+	Title      string `gorm:"column:title;type:varchar(255);not null" valid:"title"`
+	Body       string `gorm:"column:body;type:text;not null" valid:"body"`
+	UserID     uint64 `gorm:"not null;index"`
+	User       user.User
+	CategoryID uint64 `gorm:"not null;default:4;index"`
 }
 
 // Link 获取文章连接
