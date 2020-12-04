@@ -33,12 +33,17 @@ func (ac *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 
 // Index 文章列表页
 func (ac *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
-	articles, err := article.GetAll()
+	// 1. 获取结果集
+	articles, pagerData, err := article.GetAll(r, 3)
+
 	if err != nil {
 		ac.ResponseForSQLError(w, err)
 	} else {
+
+		// ---  2. 加载模板 ---
 		view.Render(w, view.D{
-			"Articles": articles,
+			"Articles":  articles,
+			"PagerData": pagerData,
 		}, "articles.index", "articles._article_meta")
 	}
 }
@@ -51,8 +56,8 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 // Store 创建文章
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	_article := article.Article{
-		Title: r.PostFormValue("title"),
-		Body:  r.PostFormValue("body"),
+		Title:  r.PostFormValue("title"),
+		Body:   r.PostFormValue("body"),
 		UserID: auth.User().ID,
 	}
 	errors := requests.ValidateArticleFormData(_article)

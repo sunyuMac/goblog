@@ -3,7 +3,10 @@ package article
 import (
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
+	"goblog/pkg/pagination"
+	"goblog/pkg/route"
 	"goblog/pkg/types"
+	"net/http"
 )
 
 func Get(idstr string) (Article, error) {
@@ -15,11 +18,14 @@ func Get(idstr string) (Article, error) {
 	return article, nil
 }
 
-func GetAll() (articles []Article, err error) {
-	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
-		return articles, err
-	}
-	return articles, nil
+// GetAll 获取全部文章
+func GetAll(r *http.Request, perPage int) (articles []Article, viewData pagination.ViewData, err error) {
+	db := model.DB.Model(Article{}).Order("created_at desc")
+	_pager := pagination.New(r, db, route.Name2URL("articles.index"), perPage)
+	viewData = _pager.Paging()
+	_pager.Results(&articles)
+
+	return
 }
 
 func (article *Article) Create() (err error) {
