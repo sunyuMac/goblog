@@ -8,9 +8,8 @@ import (
 
 // Create
 func (user *User) Create() (err error) {
-	if err = model.DB.Create(&user).Error; err != nil {
-		logger.LogError(err)
-	}
+	err = model.DB.Create(&user).Error
+	logger.LogError(err)
 
 	return
 }
@@ -23,7 +22,7 @@ func Get(idstr string) (user User, err error) {
 }
 
 // GetByEmail
-func GetByEmail(email string) (user User, err error)  {
+func GetByEmail(email string) (user User, err error) {
 	err = model.DB.Where("email = ?", email).First(&user).Error
 	return
 }
