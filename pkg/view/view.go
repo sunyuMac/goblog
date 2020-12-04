@@ -1,6 +1,7 @@
 package view
 
 import (
+	"goblog/app/models/category"
 	"goblog/pkg/auth"
 	"goblog/pkg/flash"
 	"goblog/pkg/logger"
@@ -27,9 +28,11 @@ func RenderSimple(w io.Writer, data D, tplFiles ...string) {
 // RenderTemplate 渲染视图
 func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 	// 通用模板数据
+	var err error
 	data["isLogined"] = auth.Check()
 	data["loginUser"] = auth.User
 	data["flash"] = flash.All()
+	data["Categories"], err = category.All()
 	// 合并所有模板文件
 	allFiles := getTempleFiles(tplFiles...)
 	// 解析所有模板文件
@@ -43,7 +46,7 @@ func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 	tmpl.ExecuteTemplate(w, name, data)
 }
 
-func getTempleFiles(tplFiles ...string) []string  {
+func getTempleFiles(tplFiles ...string) []string {
 	// 1 设置模板相对路径
 	viewDir := "resources/views/"
 

@@ -39,3 +39,7 @@ func (*CategoriesController) Store(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "创建文章分类失败，请联系管理员")
 	}
 }
+
+func (*CategoriesController) Show(w http.ResponseWriter, r *http.Request)  {
+	
+}
