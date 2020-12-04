@@ -34,7 +34,7 @@ func (ac *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 // Index 文章列表页
 func (ac *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 	// 1. 获取结果集
-	articles, pagerData, err := article.GetAll(r, 3)
+	articles, pagerData, err := article.GetAll(r, 5)
 
 	if err != nil {
 		ac.ResponseForSQLError(w, err)

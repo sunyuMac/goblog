@@ -14,10 +14,12 @@ type CategoriesController struct {
 	BaseController
 }
 
+// Create 创建分类页面
 func (*CategoriesController) Create(w http.ResponseWriter, r *http.Request) {
 	view.Render(w, view.D{}, "categories.create")
 }
 
+// Store 保存分类
 func (*CategoriesController) Store(w http.ResponseWriter, r *http.Request) {
 	_category := category.Category{
 		Name: r.PostFormValue("name"),
@@ -42,24 +44,30 @@ func (*CategoriesController) Store(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (cc *CategoriesController) Show(w http.ResponseWriter, r *http.Request)  {
+// Show 展示分类下文章
+func (cc *CategoriesController) Show(w http.ResponseWriter, r *http.Request) {
 	// 1. 获取 URL 参数
 	id := route.GetRouteVariable("id", r)
 
 	// 2. 读取对应的数据
-	_category, err := category.Get(id)
+	_, err := category.Get(id)
+	if err != nil {
+		cc.ResponseForSQLError(w, err)
+		return
+	}
 
 	// 3. 获取结果集
-	articles, pagerData, err := article.GetByCategoryID(_category.GetStringID(), r, 2)
+	articles, pagerData, err := article.GetByCategoryID(id, r, 5)
 
 	if err != nil {
 		cc.ResponseForSQLError(w, err)
-	} else {
-
-		// ---  2. 加载模板 ---
-		view.Render(w, view.D{
-			"Articles":  articles,
-			"PagerData": pagerData,
-		}, "articles.index", "articles._article_meta")
+		return
 	}
+
+	// ---  2. 加载模板 ---
+	view.Render(w, view.D{
+		"Articles":  articles,
+		"PagerData": pagerData,
+	}, "articles.index", "articles._article_meta")
+
 }

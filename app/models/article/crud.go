@@ -29,9 +29,8 @@ func GetAll(r *http.Request, perPage int) (articles []Article, viewData paginati
 }
 
 func (article *Article) Create() (err error) {
-	if err = model.DB.Create(&article).Error; err != nil {
-		logger.LogError(err)
-	}
+	err = model.DB.Create(&article).Error
+	logger.LogError(err)
 	return
 }
 
@@ -55,6 +54,7 @@ func (article *Article) Delete() (rowsAffected int64, err error) {
 	return result.RowsAffected, nil
 }
 
+// GetByUserId 获取用户创建的文章
 func GetByUserId(userId string) (articles []Article, err error) {
 	err = model.DB.Preload("User").Where("user_id = ?", userId).Find(&articles).Error
 
@@ -63,7 +63,6 @@ func GetByUserId(userId string) (articles []Article, err error) {
 
 // GetByCategoryID 获取分类相关的文章
 func GetByCategoryID(cid string, r *http.Request, perPage int) ([]Article, pagination.ViewData, error) {
-
 	// 1. 初始化分页实例
 	db := model.DB.Model(Article{}).Where("category_id = ?", cid).Order("created_at desc")
 	_pager := pagination.New(r, db, route.Name2URL("articles.index"), perPage)
