@@ -7,11 +7,11 @@ import (
 	"net/http"
 )
 
-// RegisterWebRoutes 注册网页相关路由
-func RegisterWebRoutes(r *mux.Router) {
-	// 静态资源
-	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
-	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public")))
+// registerWebRoutes 注册网页相关路由
+func registerWebRoutes(r *mux.Router) {
+	// 中间件注册 启用session
+	r.Use(middlewares.StartSession)
+
 	// 静态页面
 	pc := new(controllers.PagesController)
 	r.NotFoundHandler = http.HandlerFunc(pc.NotFound)
@@ -37,7 +37,6 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/categories", middlewares.Auth(cc.Store)).Methods("POST").Name("categories.store")
 	r.HandleFunc("/categories/{id:[0-9]+}", cc.Show).Methods("GET").Name("categories.show")
 
-
 	// 用户认证
 	auc := new(controllers.AuthController)
 	r.HandleFunc("/auth/register", middlewares.Guest(auc.Register)).Methods("GET").Name("auth.register")
@@ -45,8 +44,4 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/login", middlewares.Guest(auc.Login)).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/dologin", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.dologin")
 	r.HandleFunc("/auth/logout", middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
-
-	// 中间件：强制header内容类型为 HTML
-	//r.Use(middlewares.ForceHTML)
-	r.Use(middlewares.StartSession)
 }
