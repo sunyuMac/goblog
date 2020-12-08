@@ -6,12 +6,19 @@ import (
 	"goblog/app/models/user"
 	"goblog/pkg/config"
 	"goblog/pkg/model"
+	"goblog/pkg/redis"
 	"gorm.io/gorm"
 	"time"
 )
 
-// SetupDB 初始化数据库和 ORM
+// SetupDB 初始化DB
 func SetupDB() {
+	setupMysql()
+	setupRedis()
+}
+
+// setupMysql 初始化数据库和 ORM
+func setupMysql() {
 	// 建立数据库连接池
 	db := model.ConnectDB()
 
@@ -29,10 +36,16 @@ func SetupDB() {
 	migration(db)
 }
 
+// migration 维护数据库表结构
 func migration(db *gorm.DB) {
 	db.AutoMigrate(
 		&user.User{},
 		&article.Article{},
 		&category.Category{},
 	)
+}
+
+// setupRedis 初始化redis
+func setupRedis() {
+	redis.ConnectRedisPool()
 }
