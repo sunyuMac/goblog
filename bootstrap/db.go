@@ -5,6 +5,7 @@ import (
 	"goblog/app/models/category"
 	"goblog/app/models/user"
 	"goblog/pkg/config"
+	"goblog/pkg/logger"
 	"goblog/pkg/model"
 	"goblog/pkg/redis"
 	"gorm.io/gorm"
@@ -38,11 +39,12 @@ func setupMysql() {
 
 // migration 维护数据库表结构
 func migration(db *gorm.DB) {
-	db.AutoMigrate(
+	err := db.AutoMigrate(
 		&user.User{},
 		&article.Article{},
 		&category.Category{},
 	)
+	logger.LogError(err)
 }
 
 // setupRedis 初始化redis
